@@ -89,29 +89,42 @@ func _request_place_tower(tower_type: String, world_pos: Vector2, grid_pos: Vect
 	var cost = _get_tower_cost(tower_type)
 	var peer_id = NetworkManager.get_peer_id()
 
+	print("Requesting tower placement. Peer ID: ", peer_id, " Cost: ", cost)
+
 	# Request from server
 	rpc_id(1, "_server_place_tower", peer_id, tower_type, world_pos, grid_pos, cost)
 
 @rpc("any_peer", "reliable")
 func _server_place_tower(peer_id: int, tower_type: String, world_pos: Vector2, grid_pos: Vector2i, cost: int):
+	print("SERVER: Received tower placement request from peer ", peer_id, " for tower type: ", tower_type)
+
 	if not NetworkManager.is_host():
+		print("SERVER: Not host, returning")
 		return
+
+	print("SERVER: Checking gold. Player has: ", PlayerManager.get_player(peer_id).gold if PlayerManager.get_player(peer_id) else "NO PLAYER DATA")
 
 	# Check if player has enough gold
 	if not PlayerManager.spend_gold(peer_id, cost):
-		print("Player ", peer_id, " doesn't have enough gold")
+		print("SERVER: Player ", peer_id, " doesn't have enough gold")
 		return
+
+	print("SERVER: Gold spent successfully, broadcasting tower placement")
 
 	# Place tower on all clients
 	rpc("_client_place_tower", peer_id, tower_type, world_pos, grid_pos)
 
 @rpc("authority", "call_local", "reliable")
 func _client_place_tower(owner_id: int, tower_type: String, world_pos: Vector2, grid_pos: Vector2i):
+	print("CLIENT: Placing tower for owner ", owner_id, " type: ", tower_type, " at pos: ", world_pos)
+
 	# Occupy the tile
 	game_map.occupy_tile(grid_pos)
 
 	# Create tower instance
 	var tower_scene = _get_tower_scene(tower_type)
+	print("CLIENT: Tower scene loaded: ", tower_scene != null)
+
 	if tower_scene:
 		var tower = tower_scene.instantiate()
 		tower.position = world_pos
@@ -119,7 +132,9 @@ func _client_place_tower(owner_id: int, tower_type: String, world_pos: Vector2, 
 		towers_container.add_child(tower)
 
 		PlayerManager.increment_towers_placed(owner_id)
-		print("Tower placed at ", grid_pos)
+		print("CLIENT: Tower placed successfully at ", grid_pos, " (", tower.name, ")")
+	else:
+		print("CLIENT: ERROR - Tower scene is null!")
 
 func _get_tower_cost(tower_type: String) -> int:
 	match tower_type:
