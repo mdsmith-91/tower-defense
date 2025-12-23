@@ -21,7 +21,7 @@ extends Control
 @onready var ip_input = $JoinPanel/VBoxContainer/IPInput
 @onready var join_port_input = $JoinPanel/VBoxContainer/PortInput
 @onready var connect_button = $JoinPanel/VBoxContainer/ConnectButton
-@ontml:parameter name="join_back_button = $JoinPanel/VBoxContainer/BackButton
+@onready var join_back_button = $JoinPanel/VBoxContainer/BackButton
 
 # Lobby panel
 @onready var player_list = $LobbyPanel/VBoxContainer/PlayerList
