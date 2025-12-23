@@ -12,7 +12,7 @@ on:
   workflow_dispatch:
 
 env:
-  GODOT_VERSION: 4.5.1-stable
+  GODOT_VERSION: 4.5.1
   EXPORT_NAME: tower-defense
 
 jobs:
@@ -27,44 +27,38 @@ jobs:
         with:
           lfs: true
 
+      - name: Download and Setup Godot
+        run: |
+          wget -q https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}-stable/Godot_v${GODOT_VERSION}-stable_linux.x86_64.zip
+          wget -q https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}-stable/Godot_v${GODOT_VERSION}-stable_export_templates.tpz
+          unzip -q Godot_v${GODOT_VERSION}-stable_linux.x86_64.zip
+          unzip -q Godot_v${GODOT_VERSION}-stable_export_templates.tpz
+          mkdir -p ~/.local/share/godot/export_templates/${GODOT_VERSION}.stable
+          mv templates/* ~/.local/share/godot/export_templates/${GODOT_VERSION}.stable/
+          chmod +x Godot_v${GODOT_VERSION}-stable_linux.x86_64
+
       - name: Export for Windows
-        id: windows
-        uses: firebelley/godot-export@v5.2.1
-        with:
-          godot_executable_download_url: https://github.com/godotengine/godot/releases/download/4.5.1-stable/Godot_v4.5.1-stable_linux.x86_64.zip
-          godot_export_templates_download_url: https://github.com/godotengine/godot/releases/download/4.5.1-stable/Godot_v4.5.1-stable_export_templates.tpz
-          relative_project_path: ./
-          archive_output: true
-          export_debug: false
-          use_preset_export_path: false
-          relative_export_path: ./builds/windows
-          wine_path: ''
+        run: |
+          mkdir -p builds/windows
+          ./Godot_v${GODOT_VERSION}-stable_linux.x86_64 --headless --verbose --export-release "Windows Desktop" builds/windows/${EXPORT_NAME}.exe
 
       - name: Export for macOS
-        id: macos
-        uses: firebelley/godot-export@v5.2.1
-        with:
-          godot_executable_download_url: https://github.com/godotengine/godot/releases/download/4.5.1-stable/Godot_v4.5.1-stable_linux.x86_64.zip
-          godot_export_templates_download_url: https://github.com/godotengine/godot/releases/download/4.5.1-stable/Godot_v4.5.1-stable_export_templates.tpz
-          relative_project_path: ./
-          archive_output: true
-          export_debug: false
-          use_preset_export_path: false
-          relative_export_path: ./builds/macos
-          wine_path: ''
+        run: |
+          mkdir -p builds/macos
+          ./Godot_v${GODOT_VERSION}-stable_linux.x86_64 --headless --verbose --export-release "MacOS" builds/macos/${EXPORT_NAME}.zip
 
       - name: Upload Windows Build
         uses: actions/upload-artifact@v4
         with:
           name: windows-build
-          path: ${{ steps.windows.outputs.archive_directory }}/*
+          path: builds/windows/
           retention-days: 14
 
       - name: Upload macOS Build
         uses: actions/upload-artifact@v4
         with:
           name: macos-build
-          path: ${{ steps.macos.outputs.archive_directory }}/*
+          path: builds/macos/
           retention-days: 14
 
       - name: Create Release
@@ -72,8 +66,8 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           files: |
-            ${{ steps.windows.outputs.archive_directory }}/*
-            ${{ steps.macos.outputs.archive_directory }}/*
+            builds/windows/*
+            builds/macos/*
           draft: false
           prerelease: false
         env:
