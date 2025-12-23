@@ -13,7 +13,7 @@ config_version=5
 config/name="Co-op Tower Defense"
 config/description="A cooperative multiplayer tower defense game"
 run/main_scene="res://scenes/ui/main_menu.tscn"
-config/features=PackedStringArray("4.3", "Forward Plus")
+config/features=PackedStringArray("4.5", "Forward Plus")
 config/icon="res://icon.svg"
 
 [autoload]
@@ -27,7 +27,6 @@ PlayerManager="*res://scripts/singletons/player_manager.gd"
 window/size/viewport_width=1920
 window/size/viewport_height=1080
 window/size/mode=2
-window/size/resizable=true
 window/stretch/mode="viewport"
 
 [input]
@@ -46,3 +45,4 @@ ui_right_click={
 [rendering]
 
 textures/canvas_textures/default_texture_filter=0
+textures/vram_compression/import_etc2_astc=true
