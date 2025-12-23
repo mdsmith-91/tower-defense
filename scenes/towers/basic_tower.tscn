@@ -1,0 +1,21 @@
+[gd_scene load_steps=2 format=3 uid="uid://bt7n8m9p0q1r2"]
+
+[ext_resource type="Script" path="res://scripts/towers/basic_tower.gd" id="1"]
+
+[node name="BasicTower" type="Node2D" groups=["towers"]]
+script = ExtResource("1")
+
+[node name="Sprite2D" type="Polygon2D" parent="."]
+color = Color(0.6, 0.6, 0.8, 1)
+polygon = PackedVector2Array(-20, -20, 20, -20, 20, 20, -20, 20)
+
+[node name="Turret" type="Node2D" parent="."]
+
+[node name="TurretSprite" type="Polygon2D" parent="Turret"]
+color = Color(0.4, 0.4, 0.6, 1)
+polygon = PackedVector2Array(0, -8, 25, -5, 25, 5, 0, 8)
+
+[node name="RangeIndicator" type="Polygon2D" parent="."]
+visible = false
+color = Color(1, 1, 1, 0.1)
+polygon = PackedVector2Array()
