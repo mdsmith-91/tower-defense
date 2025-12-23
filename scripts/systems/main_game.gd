@@ -39,13 +39,16 @@ func _input(event):
 	# Handle tower placement
 	if event is InputEventMouseButton and event.pressed:
 		if event.button_index == MOUSE_BUTTON_LEFT and not selected_tower_type.is_empty():
+			print("Left click detected! Selected tower: ", selected_tower_type)
 			# Convert mouse position to game map's local space
 			var mouse_pos = get_global_mouse_position()
 			var map_local_pos = game_map.to_local(mouse_pos)
+			print("Mouse global: ", mouse_pos, " Map local: ", map_local_pos)
 			_try_place_tower(map_local_pos)
 		elif event.button_index == MOUSE_BUTTON_RIGHT:
 			# Cancel tower selection
 			selected_tower_type = ""
+			print("Tower selection cancelled")
 
 func _show_tower_preview():
 	# Visual feedback for tower placement (will be enhanced with actual preview)
@@ -62,9 +65,10 @@ func _show_tower_preview():
 
 func _try_place_tower(map_local_pos: Vector2):
 	var grid_pos = game_map.world_to_grid(map_local_pos)
+	print("Grid position: ", grid_pos)
 
 	if not game_map.can_place_tower(grid_pos):
-		print("Cannot place tower here!")
+		print("Cannot place tower here! Grid pos: ", grid_pos)
 		return
 
 	# Get world position for tower (in map's local space)
@@ -72,6 +76,8 @@ func _try_place_tower(map_local_pos: Vector2):
 
 	# Convert to global position for tower placement
 	var tower_global_pos = game_map.to_global(tower_local_pos)
+
+	print("Placing tower at grid: ", grid_pos, " global: ", tower_global_pos)
 
 	# Request tower placement from server
 	_request_place_tower(selected_tower_type, tower_global_pos, grid_pos)
