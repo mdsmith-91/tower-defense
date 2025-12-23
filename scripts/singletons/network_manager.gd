@@ -74,9 +74,6 @@ func _on_player_connected(id: int):
 		# Send existing players to new player
 		rpc_id(id, "_receive_player_list", players)
 
-		# Broadcast new player to all existing players
-		rpc("_add_player", id, player_info)
-
 # Called when a peer disconnects
 func _on_player_disconnected(id: int):
 	print("Player disconnected: ", id)
@@ -116,8 +113,11 @@ func _register_player(id: int, info: Dictionary):
 	players[id] = info
 	PlayerManager.add_player(id, info)
 
-	# Broadcast to all clients
+	# Broadcast to all clients (including host via call_local)
 	rpc("_add_player", id, info)
+
+	# Emit signal on host as well
+	player_connected.emit(id, info)
 
 # RPC to add a player to all clients
 @rpc("authority", "reliable")
