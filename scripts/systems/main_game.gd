@@ -91,8 +91,11 @@ func _request_place_tower(tower_type: String, world_pos: Vector2, grid_pos: Vect
 
 	print("Requesting tower placement. Peer ID: ", peer_id, " Cost: ", cost)
 
-	# Request from server
-	rpc_id(1, "_server_place_tower", peer_id, tower_type, world_pos, grid_pos, cost)
+	# If we're the host, call directly. Otherwise, send RPC to host
+	if NetworkManager.is_host():
+		_server_place_tower(peer_id, tower_type, world_pos, grid_pos, cost)
+	else:
+		rpc_id(1, "_server_place_tower", peer_id, tower_type, world_pos, grid_pos, cost)
 
 @rpc("any_peer", "reliable")
 func _server_place_tower(peer_id: int, tower_type: String, world_pos: Vector2, grid_pos: Vector2i, cost: int):
